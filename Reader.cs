@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading.Tasks;
 using EmbeddedResourcesHandler;
@@ -24,16 +25,41 @@ namespace PartialFileReader
         /// <param name="filename">the path for the file on desk to read</param>
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the string read from the file</returns>
-        public static string ReadChars(string filename, int count) => ReadCharsAsync(filename, count).Result;
+        public static string ReadChars(string filename, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
+        {
+            try
+            {
 
+                return ReadCharsAsync(filename, count, startIndex, startIndexPosition).Result;
+            }
+            catch (Exception ex)
+            {
+
+                ExceptionDispatchInfo EDI = ExceptionDispatchInfo.Capture(ex.InnerException);
+                EDI.Throw();
+                return "";
+            }
+        }
         /// <summary>
         /// Read certain amount of characters from a stream
         /// </summary>
         /// <param name="stream">the stream to read from</param>
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the string read from the file</returns>
-        public static string ReadChars(Stream stream, int count) => ReadCharsAsync(stream, count).Result;
+        public static string ReadChars(Stream stream, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
+        {
+            try
+            {
+                return ReadCharsAsync(stream, count, startIndex, startIndexPosition).Result;
+            }
+            catch (Exception ex)
+            {
 
+                ExceptionDispatchInfo EDI = ExceptionDispatchInfo.Capture(ex.InnerException);
+                EDI.Throw();
+                return "";
+            }
+        }
         /// <summary>
         /// Read certain amount of characters from a file on desk
         /// opens the file in read mode and uses a stream reader
@@ -42,13 +68,13 @@ namespace PartialFileReader
         /// <param name="filename">the path for the file on desk to read</param>
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the Task of string read from the file</returns>
-        public static async Task<string> ReadCharsAsync(string filename, int count)
+        public static async Task<string> ReadCharsAsync(string filename, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
         {
             if (!File.Exists(filename))
                 throw new FileNotFoundException($"file specified was not found on desk {filename}");
 
             await using var stream = File.OpenRead(filename);
-            return await ReadCharsAsync(stream, count);
+            return await ReadCharsAsync(stream, count, startIndex, startIndexPosition);
         }
 
         /// <summary>
@@ -57,11 +83,15 @@ namespace PartialFileReader
         /// <param name="stream">the stream to read from</param>
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the Task of string read from the file</returns>
-        public static async Task<string> ReadCharsAsync(Stream stream, int count)
+        public static async Task<string> ReadCharsAsync(Stream stream, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
         {
             if (stream.Length < count)
                 throw new ArgumentException($"The stream length is {stream.Length} while attempting to read {count} characters");
 
+            if ((stream.Length < startIndex) || (count < 0))
+                throw new OverflowException($"The start Index ({startIndex}) is Greater than the count ({count})");
+
+            stream.Seek(startIndex, startIndexPosition);
             using var reader = new StreamReader(stream, Encoding.UTF8);
             var buffer = new char[count];
             var n = await reader.ReadBlockAsync(buffer, 0, count);
@@ -81,8 +111,20 @@ namespace PartialFileReader
         /// <param name="filename">the path for the file on desk to read</param>
         /// <param name="count">the count of bytes to read</param>
         /// <returns>return the byte[] read from the file</returns>
-        public static byte[] ReadBytes(string filename, int count) => ReadBytesAsync(filename, count).Result;
+        public static byte[] ReadBytes(string filename, int count)
+        {
+            try
+            {
+                return ReadBytesAsync(filename, count).Result;
+            }
+            catch (Exception ex)
+            {
 
+                ExceptionDispatchInfo EDI = ExceptionDispatchInfo.Capture(ex.InnerException);
+                EDI.Throw();
+                return null;
+            }
+        }
         /// <summary>
         /// Read certain amount of characters from a file on desk
         /// opens the file in read mode and uses a stream reader
@@ -91,13 +133,24 @@ namespace PartialFileReader
         /// <param name="filename">the path for the file on desk to read</param>
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the Task of byte[] read from the file</returns>
-        public static async Task<byte[]> ReadBytesAsync(string filename, int count)
+        public static async Task<byte[]> ReadBytesAsync(string filename, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
         {
             if (!File.Exists(filename))
                 throw new FileNotFoundException($"file specified was not found on desk {filename}");
 
+            if (count < 0)
+                throw new OverflowException($"The of ({count}) the array byte can't be null");
+
             var buffer = new byte[count];
             await using var fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
+
+            if (fs.Length < count)
+                throw new ArgumentException($"The stream length is {fs.Length} while attempting to read {count} characters");
+
+            if (fs.Length < startIndex) 
+                throw new OverflowException($"The start Index ({startIndex}) is Greater than the count ({count})");
+
+            fs.Seek(startIndex, startIndexPosition);
             await fs.ReadAsync(buffer, 0, buffer.Length);
             return buffer;
         }
@@ -110,8 +163,20 @@ namespace PartialFileReader
         /// <param name="stream">the stream to read from</param>
         /// <param name="count">the count of bytes to read</param>
         /// <returns>return the byte[] read from the file</returns>
-        public static byte[] ReadBytes(Stream stream, int count) => ReadBytesAsync(stream, count).Result;
+        public static byte[] ReadBytes(Stream stream, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
+        {
+            try
+            {
+                return ReadBytesAsync(stream, count, startIndex, startIndexPosition).Result;
+            }
+            catch (Exception ex)
+            {
 
+                ExceptionDispatchInfo EDI = ExceptionDispatchInfo.Capture(ex.InnerException);
+                EDI.Throw();
+                return null;
+            }
+        }
         /// <summary>
         /// Read certain amount of characters from a file on desk
         /// opens the file in read mode and uses a stream reader
@@ -120,11 +185,15 @@ namespace PartialFileReader
         /// <param name="stream">the stream to read from</param>
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the Task of byte[] read from the file</returns>
-        public static async Task<byte[]> ReadBytesAsync(Stream stream, int count)
+        public static async Task<byte[]> ReadBytesAsync(Stream stream, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
         {
             if (stream.Length < count)
                 throw new ArgumentException($"The stream length is {stream.Length} while attempting to read {count} characters");
+            if ((stream.Length < startIndex) || (count < 0))
+                throw new OverflowException($"The start Index ({startIndex}) is Greater than the count ({count})");
 
+
+            stream.Seek(startIndex, startIndexPosition);
             var buffer = new byte[count];
             await stream.ReadAsync(buffer, 0, buffer.Length);
             return buffer;
