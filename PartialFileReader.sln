@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31321.278
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PartialFileReader", "..\New folder\PartialFileReader\PartialFileReader.csproj", "{A665CC5F-E44D-4C7D-8DC3-579A4DA53144}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PartialFileReader", "PartialFileReader\PartialFileReader.csproj", "{D4569652-5C01-4A2C-B6FB-41471F56047C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PartialFileReaderTest", "..\New folder\PartialFileReaderTest\PartialFileReaderTest.csproj", "{6FDE8082-5EE8-4FFC-B1E9-F97380FA8FB9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PartialFileReaderTest", "PartialFileReaderTest\PartialFileReaderTest.csproj", "{3BD5D7C4-446C-40BA-B096-78DCB571676D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A665CC5F-E44D-4C7D-8DC3-579A4DA53144}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A665CC5F-E44D-4C7D-8DC3-579A4DA53144}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A665CC5F-E44D-4C7D-8DC3-579A4DA53144}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A665CC5F-E44D-4C7D-8DC3-579A4DA53144}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6FDE8082-5EE8-4FFC-B1E9-F97380FA8FB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6FDE8082-5EE8-4FFC-B1E9-F97380FA8FB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6FDE8082-5EE8-4FFC-B1E9-F97380FA8FB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6FDE8082-5EE8-4FFC-B1E9-F97380FA8FB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4569652-5C01-4A2C-B6FB-41471F56047C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4569652-5C01-4A2C-B6FB-41471F56047C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4569652-5C01-4A2C-B6FB-41471F56047C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4569652-5C01-4A2C-B6FB-41471F56047C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BD5D7C4-446C-40BA-B096-78DCB571676D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BD5D7C4-446C-40BA-B096-78DCB571676D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BD5D7C4-446C-40BA-B096-78DCB571676D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BD5D7C4-446C-40BA-B096-78DCB571676D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
