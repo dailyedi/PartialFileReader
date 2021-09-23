@@ -102,7 +102,7 @@ namespace PartialFileReader
                 throw new ArgumentException($"The stream length is {stream.Length} while attempting to read {count} characters");
 
 
-            if ((stream.Length < startIndex)||(count<0))
+            if ((stream.Length < startIndex) || (count < 0))
                 throw new OverflowException($"The start Index ({startIndex}) is Greater than the count ({count})");
 
             stream.Seek(startIndex, startIndexPosition);
