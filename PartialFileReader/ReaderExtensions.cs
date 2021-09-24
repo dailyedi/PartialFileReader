@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading.Tasks;
 using EmbeddedResourcesHandler;
@@ -22,11 +23,15 @@ namespace PartialFileReader
         /// <param name="stream">the stream to read from</param>
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the Task of string read from the file</returns>
-        public static async Task<string> ReadCharsAsync(this Stream stream, int count)
+        public static async Task<string> ReadCharsAsync(this Stream stream, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
         {
             if (stream.Length < count)
                 throw new ArgumentException($"The stream length is {stream.Length} while attempting to read {count} characters");
 
+            if ((stream.Length < startIndex) || (count < 0))
+                throw new OverflowException($"The start Index ({startIndex}) is Greater than the count ({count})");
+
+            stream.Seek(startIndex, startIndexPosition);
             using var reader = new StreamReader(stream, Encoding.UTF8);
             var buffer = new char[count];
             var n = await reader.ReadBlockAsync(buffer, 0, count);
@@ -44,7 +49,21 @@ namespace PartialFileReader
         /// <param name="stream">the stream to read from</param>
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the string read from the file</returns>
-        public static string ReadChars(this Stream stream, int count) => ReadCharsAsync(stream, count).Result;
+        public static string ReadChars(this Stream stream, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
+        {
+            try
+            {
+
+                return ReadCharsAsync(stream, count, startIndex, startIndexPosition).Result;
+            }
+            catch (Exception ex)
+            {
+
+                ExceptionDispatchInfo EDI = ExceptionDispatchInfo.Capture(ex.InnerException);
+                EDI.Throw();
+                return "";
+            }
+        }
 
         /// <summary>
         /// Read certain amount of bytes from a file on desk
@@ -54,8 +73,21 @@ namespace PartialFileReader
         /// <param name="stream">the stream to read from</param>
         /// <param name="count">the count of bytes to read</param>
         /// <returns>return the byte[] read from the file</returns>
-        public static byte[] ReadBytes(this Stream stream, int count) => ReadBytesAsync(stream, count).Result;
+        public static byte[] ReadBytes(this Stream stream, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
+        {
+            try
+            {
 
+                return ReadBytesAsync(stream, count, startIndex, startIndexPosition).Result;
+            }
+            catch (Exception ex)
+            {
+
+                ExceptionDispatchInfo EDI = ExceptionDispatchInfo.Capture(ex.InnerException);
+                EDI.Throw();
+                return null;
+            }
+        }
         /// <summary>
         /// Read certain amount of characters from a file on desk
         /// opens the file in read mode and uses a stream reader
@@ -64,11 +96,16 @@ namespace PartialFileReader
         /// <param name="stream">the stream to read from</param>
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the Task of byte[] read from the file</returns>
-        public static async Task<byte[]> ReadBytesAsync(this Stream stream, int count)
+        public static async Task<byte[]> ReadBytesAsync(this Stream stream, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
         {
             if (stream.Length < count)
                 throw new ArgumentException($"The stream length is {stream.Length} while attempting to read {count} characters");
 
+
+            if ((stream.Length < startIndex) || (count < 0))
+                throw new OverflowException($"The start Index ({startIndex}) is Greater than the count ({count})");
+
+            stream.Seek(startIndex, startIndexPosition);
             var buffer = new byte[count];
             await stream.ReadAsync(buffer, 0, buffer.Length);
             return buffer;
@@ -86,8 +123,8 @@ namespace PartialFileReader
         /// <param name="filename">the path for the file on desk to read</param>
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the string read from the file</returns>
-        public static string ReadCharsFromEmbeddedResource(this Assembly assembly, string filename, int count)
-            => ReadCharsFromEmbeddedResourceAsync(assembly, filename, count).Result;
+        public static string ReadCharsFromEmbeddedResource(this Assembly assembly, string filename, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
+            => ReadCharsFromEmbeddedResourceAsync(assembly, filename, count, startIndex, startIndexPosition).Result;
 
         /// <summary>
         /// Read certain amount of characters from a file on desk
@@ -98,7 +135,7 @@ namespace PartialFileReader
         /// <param name="filename">the path for the file on desk to read</param>
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the Task of string read from the file</returns>
-        public static async Task<string> ReadCharsFromEmbeddedResourceAsync(this Assembly assembly, string filename, int count)
+        public static async Task<string> ReadCharsFromEmbeddedResourceAsync(this Assembly assembly, string filename, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
         {
             if (!File.Exists(filename))
                 throw new FileNotFoundException($"file specified was not found on desk {filename}");
@@ -115,8 +152,8 @@ namespace PartialFileReader
         /// <param name="filename">the path for the file on desk to read</param>
         /// <param name="count">the count of bytes to read</param>
         /// <returns>return the byte[] read from the file</returns>
-        public static byte[] ReadBytesFromEmbeddedResource(this Assembly assembly, string filename, int count)
-            => ReadBytesFromEmbeddedResourceAsync(assembly, filename, count).Result;
+        public static byte[] ReadBytesFromEmbeddedResource(this Assembly assembly, string filename, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
+            => ReadBytesFromEmbeddedResourceAsync(assembly, filename, count, startIndex, startIndexPosition).Result;
 
         /// <summary>
         /// Read certain amount of characters from a file on desk
@@ -127,13 +164,14 @@ namespace PartialFileReader
         /// <param name="filename">the path for the file on desk to read</param>
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the Task of byte[] read from the file</returns>
-        public static async Task<byte[]> ReadBytesFromEmbeddedResourceAsync(this Assembly assembly, string filename, int count)
+        public static async Task<byte[]> ReadBytesFromEmbeddedResourceAsync(this Assembly assembly, string filename, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
         {
             if (!File.Exists(filename))
                 throw new FileNotFoundException($"file specified was not found on desk {filename}");
 
             var buffer = new byte[count];
             await using var fs = assembly.GetFileStream(filename);
+            fs.Seek(startIndex, startIndexPosition);
             await fs.ReadAsync(buffer, 0, buffer.Length);
             return buffer;
         }
@@ -151,8 +189,8 @@ namespace PartialFileReader
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the string read from the file</returns>
         public static string ReadCharsFromEmbeddedResource(this Assembly assembly,
-            Func<string, string, bool> matchingPredicate, string filename, int count)
-            => ReadCharsFromEmbeddedResourceAsync(assembly, matchingPredicate, filename, count).Result;
+            Func<string, string, bool> matchingPredicate, string filename, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
+            => ReadCharsFromEmbeddedResourceAsync(assembly, matchingPredicate, filename, count, startIndex, startIndexPosition).Result;
 
         /// <summary>
         /// Read certain amount of characters from a file on desk
@@ -165,12 +203,12 @@ namespace PartialFileReader
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the Task of string read from the file</returns>
         public static async Task<string> ReadCharsFromEmbeddedResourceAsync(this Assembly assembly,
-            Func<string, string, bool> matchingPredicate, string filename, int count)
+            Func<string, string, bool> matchingPredicate, string filename, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
         {
             if (!File.Exists(filename))
                 throw new FileNotFoundException($"file specified was not found on desk {filename}");
 
-            return await ReadCharsAsync(assembly.GetFileStream(filename, matchingPredicate), count);
+            return await ReadCharsAsync(assembly.GetFileStream(filename, matchingPredicate), count, startIndex, startIndexPosition);
         }
 
         /// <summary>
@@ -184,8 +222,8 @@ namespace PartialFileReader
         /// <param name="count">the count of bytes to read</param>
         /// <returns>return the byte[] read from the file</returns>
         public static byte[] ReadBytesFromEmbeddedResource(this Assembly assembly,
-            Func<string, string, bool> matchingPredicate, string filename, int count)
-            => ReadBytesFromEmbeddedResourceAsync(assembly, matchingPredicate, filename, count).Result;
+            Func<string, string, bool> matchingPredicate, string filename, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
+            => ReadBytesFromEmbeddedResourceAsync(assembly, matchingPredicate, filename, count, startIndex, startIndexPosition).Result;
 
         /// <summary>
         /// Read certain amount of characters from a file on desk
@@ -198,13 +236,14 @@ namespace PartialFileReader
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the Task of byte[] read from the file</returns>
         public static async Task<byte[]> ReadBytesFromEmbeddedResourceAsync(this Assembly assembly,
-            Func<string, string, bool> matchingPredicate, string filename, int count)
+            Func<string, string, bool> matchingPredicate, string filename, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
         {
             if (!File.Exists(filename))
                 throw new FileNotFoundException($"file specified was not found on desk {filename}");
 
             var buffer = new byte[count];
             await using var fs = assembly.GetFileStream(filename, matchingPredicate);
+            fs.Seek(startIndex, startIndexPosition);
             await fs.ReadAsync(buffer, 0, buffer.Length);
             return buffer;
         }
@@ -220,12 +259,12 @@ namespace PartialFileReader
         /// <param name="filename">the path for the file on desk to read</param>
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the Task of string read from the file</returns>
-        public static async Task<string> ReadCharsFromEmbeddedResourceAsync(this EmbeddedResourcesServices ers, string filename, int count)
+        public static async Task<string> ReadCharsFromEmbeddedResourceAsync(this EmbeddedResourcesServices ers, string filename, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
         {
             if (!File.Exists(filename))
                 throw new FileNotFoundException($"file specified was not found on desk {filename}");
 
-            return await ReadCharsAsync(ers.GetFileStream(filename), count);
+            return await ReadCharsAsync(ers.GetFileStream(filename), count, startIndex, startIndexPosition);
         }
 
         /// <summary>
@@ -237,8 +276,8 @@ namespace PartialFileReader
         /// <param name="filename">the path for the file on desk to read</param>
         /// <param name="count">the count of bytes to read</param>
         /// <returns>return the byte[] read from the file</returns>
-        public static byte[] ReadBytesFromEmbeddedResource(this EmbeddedResourcesServices ers, string filename, int count)
-            => ReadBytesFromEmbeddedResourceAsync(ers, filename, count).Result;
+        public static byte[] ReadBytesFromEmbeddedResource(this EmbeddedResourcesServices ers, string filename, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
+            => ReadBytesFromEmbeddedResourceAsync(ers, filename, count, startIndex, startIndexPosition).Result;
 
         /// <summary>
         /// Read certain amount of characters from a file on desk
@@ -249,13 +288,14 @@ namespace PartialFileReader
         /// <param name="filename">the path for the file on desk to read</param>
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the Task of byte[] read from the file</returns>
-        public static async Task<byte[]> ReadBytesFromEmbeddedResourceAsync(this EmbeddedResourcesServices ers, string filename, int count)
+        public static async Task<byte[]> ReadBytesFromEmbeddedResourceAsync(this EmbeddedResourcesServices ers, string filename, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
         {
             if (!File.Exists(filename))
                 throw new FileNotFoundException($"file specified was not found on desk {filename}");
 
             var buffer = new byte[count];
             await using var fs = ers.GetFileStream(filename);
+            fs.Seek(startIndex, startIndexPosition);
             await fs.ReadAsync(buffer, 0, buffer.Length);
             return buffer;
         }
@@ -273,8 +313,8 @@ namespace PartialFileReader
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the string read from the file</returns>
         public static string ReadCharsFromEmbeddedResource(this EmbeddedResourcesServices ers,
-            Func<string, string, bool> matchingPredicate, string filename, int count)
-            => ReadCharsFromEmbeddedResourceAsync(ers, matchingPredicate, filename, count).Result;
+            Func<string, string, bool> matchingPredicate, string filename, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
+            => ReadCharsFromEmbeddedResourceAsync(ers, matchingPredicate, filename, count, startIndex, startIndexPosition).Result;
 
         /// <summary>
         /// Read certain amount of characters from a file on desk
@@ -287,12 +327,12 @@ namespace PartialFileReader
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the Task of string read from the file</returns>
         public static async Task<string> ReadCharsFromEmbeddedResourceAsync(this EmbeddedResourcesServices ers,
-            Func<string, string, bool> matchingPredicate, string filename, int count)
+            Func<string, string, bool> matchingPredicate, string filename, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
         {
             if (!File.Exists(filename))
                 throw new FileNotFoundException($"file specified was not found on desk {filename}");
 
-            return await ReadCharsAsync(ers.GetFileStream(filename, matchingPredicate), count);
+            return await ReadCharsAsync(ers.GetFileStream(filename, matchingPredicate), count, startIndex, startIndexPosition);
         }
 
         /// <summary>
@@ -306,8 +346,8 @@ namespace PartialFileReader
         /// <param name="count">the count of bytes to read</param>
         /// <returns>return the byte[] read from the file</returns>
         public static byte[] ReadBytesFromEmbeddedResource(this EmbeddedResourcesServices ers,
-            Func<string, string, bool> matchingPredicate, string filename, int count)
-            => ReadBytesFromEmbeddedResourceAsync(ers, matchingPredicate, filename, count).Result;
+            Func<string, string, bool> matchingPredicate, string filename, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
+            => ReadBytesFromEmbeddedResourceAsync(ers, matchingPredicate, filename, count, startIndex, startIndexPosition).Result;
 
         /// <summary>
         /// Read certain amount of characters from a file on desk
@@ -320,13 +360,14 @@ namespace PartialFileReader
         /// <param name="count">the count of characters to read</param>
         /// <returns>return the Task of byte[] read from the file</returns>
         public static async Task<byte[]> ReadBytesFromEmbeddedResourceAsync(this EmbeddedResourcesServices ers,
-            Func<string, string, bool> matchingPredicate, string filename, int count)
+            Func<string, string, bool> matchingPredicate, string filename, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
         {
             if (!File.Exists(filename))
                 throw new FileNotFoundException($"file specified was not found on desk {filename}");
 
             var buffer = new byte[count];
             await using var fs = ers.GetFileStream(filename, matchingPredicate);
+            fs.Seek(startIndex, startIndexPosition);
             await fs.ReadAsync(buffer, 0, buffer.Length);
             return buffer;
         }

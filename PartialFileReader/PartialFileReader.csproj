@@ -6,7 +6,7 @@
 	  <Company>DailyEDI</Company>
 	  <Description>a partial file reader that allows you easily to read any amount of characters from a file instead of having to read the entire thing, which helps in cases when you need to read a file header or metadata without reading the entire file using the file name or a stream and the count you wish to read</Description>
 	  <PackageProjectUrl>https://github.com/dailyedi/PartialFileReader</PackageProjectUrl>
-	  <PackageIcon>128x114.jpg</PackageIcon>
+	  <!--<PackageIcon>128x114.jpg</PackageIcon>-->
 	  <RepositoryUrl>https://github.com/dailyedi/PartialFileReader</RepositoryUrl>
 	  <PackageTags>PartialFileReader;EfficientFileReader;FileHeaderReader;HeaderReader</PackageTags>
 	  <NeutralLanguage>en</NeutralLanguage>
@@ -20,17 +20,5 @@
   <ItemGroup>
     <PackageReference Include="DailyEDI.EmbeddedResourcesHandler" Version="2021.8.30.1424" />
   </ItemGroup>
-
-	<ItemGroup>
-		<None Include="..\..\..\Desktop\logos\128x114.jpg">
-			<Pack>True</Pack>
-			<PackagePath></PackagePath>
-		</None>
-	</ItemGroup>
-
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="dotnet pack -p:PackageVersion=$(ver) --no-build --configuration $(Configuration) --output &quot;$(SolutionDir)nuget" />
-		<Exec Command="nuget sign &quot;$(SolutionDir)nuget\DailyEDI.$(AssemblyName).$(ver).nupkg&quot; -CertificateSubjectName &quot;Daily EDI&quot;  -Timestamper http://timestamp.sectigo.com" />
-	</Target>
 
 </Project>
