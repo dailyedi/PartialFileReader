@@ -201,7 +201,7 @@ namespace PartialFileReader.Test
         [InlineData(68)]
         [InlineData(71)]
         [InlineData(395)]
-        public async Task ReadChars_NotWorking_exceed_start_index(int count)
+        public void ReadChars_NotWorking_exceed_start_index(int count)
         {
             byte[] bytes = File.ReadAllBytes("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt");
             Stream stream = new MemoryStream(bytes);
@@ -229,11 +229,8 @@ namespace PartialFileReader.Test
             var expected = await expectedBytes("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
 
 
-
-            for (int i = 1; i <= count; i++)
-            {
                 Assert.Equal(expected, actual);
-            }
+            
         }
         [Theory]
         [InlineData(0)]
