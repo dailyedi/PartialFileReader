@@ -138,19 +138,18 @@ namespace PartialFileReader
             if (!File.Exists(filename))
                 throw new FileNotFoundException($"file specified was not found on desk {filename}");
 
-            if (count < 0)
+
+            await using var fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
+
+            if ((fs.Length < startIndex) || (count < 0))
                 throw new OverflowException($"The of ({count}) the array byte can't be null");
 
-            var buffer = new byte[count];
-            await using var fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
 
             if (fs.Length < count)
                 throw new ArgumentException($"The stream length is {fs.Length} while attempting to read {count} characters");
 
-            if (fs.Length < startIndex)
-                throw new OverflowException($"The start Index ({startIndex}) is Greater than the count ({count})");
-
             fs.Seek(startIndex, startIndexPosition);
+            var buffer = new byte[count];
             await fs.ReadAsync(buffer, 0, buffer.Length);
             return buffer;
         }
