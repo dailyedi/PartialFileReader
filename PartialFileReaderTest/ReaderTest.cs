@@ -12,9 +12,9 @@ namespace PartialFileReaderTest
 {
     public class ReaderTest
     {
-        #region Char
+        #region Testing_Read_Chars_Methods
 
-        #region async
+        #region Testing_Async_Read_Chars_Methods
 
         [Theory]
         [InlineData(0)]
@@ -141,7 +141,7 @@ namespace PartialFileReaderTest
 
         #endregion
 
-        #region sync
+        #region Testing_Sync_Read_Chars_Methods
         [Theory]
         [InlineData(0)]
         [InlineData(36)]
@@ -246,9 +246,9 @@ namespace PartialFileReaderTest
         #endregion
 
 
-        #region Byte
+        #region Testing_Read_Bytes_Methods
 
-        #region async
+        #region Testing_Async_Read_Bytes_Methods
 
         [Theory]
         [InlineData(0)]
@@ -377,7 +377,7 @@ namespace PartialFileReaderTest
 
         #endregion
 
-        #region sync
+        #region Testing_Sync_Read_Bytes_Methods
         [Theory]
         [InlineData(0)]
         [InlineData(36)]

@@ -255,7 +255,7 @@ namespace PartialFileReader.Test
             byte[] bytes = File.ReadAllBytes(@"..\..\..\Testing\New Text Document.txt");
             Stream stream = new MemoryStream(bytes);
 
-            await Assert.ThrowsAsync<OverflowException>(() => stream.ReadCharsAsync(count, 1000));
+            await Assert.ThrowsAsync<OverflowException>(async () =>await stream.ReadCharsAsync(count, 1000));
 
         }
         #endregion
