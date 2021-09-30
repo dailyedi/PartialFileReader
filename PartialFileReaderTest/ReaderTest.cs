@@ -12,46 +12,6 @@ namespace PartialFileReaderTest
 {
     public class ReaderTest
     {
-        #region Helpers
-        private string expectedCharsFromAssembly(string resourceName, int count, int startIndex = 0)
-        {
-            string result;
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-            using (StreamReader expectedStream = new StreamReader(stream))
-            {
-                result = expectedStream.ReadToEnd();
-            }
-
-            return result.Substring(startIndex, count);
-        }
-        private async Task<byte[]> expectedBytes(string path, int count, int startIndex = 0, SeekOrigin startIndexPosition = SeekOrigin.Begin)
-        {
-            byte[] bytes = File.ReadAllBytes(path);
-            Stream expectedStream = new MemoryStream(bytes);
-
-
-            expectedStream.Seek(startIndex, startIndexPosition);
-            var expected = new byte[count];
-            await expectedStream.ReadAsync(expected, 0, expected.Length);
-            return expected;
-        }
-        private Stream GetFileStream(string path, int count)
-        {
-            byte[] bytes = File.ReadAllBytes(path);
-            return new MemoryStream(bytes);
-        }
-
-        private string expectedChars_fromPath(string path, int count, int startIndex = 0)
-        {
-
-            string expected = File.ReadAllText(path).Substring(startIndex, count);
-            return expected;
-        }
-        #endregion
-
-
-
         #region Char
 
         #region async
@@ -65,9 +25,9 @@ namespace PartialFileReaderTest
         public async Task ReadCharsAsync_FileName_Working_count(int count)
         {
 
-            string actual = await Reader.ReadCharsAsync("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            string actual = await Reader.ReadCharsAsync(@"..\..\..\Testing\New Text Document.txt", count);
 
-            string expected = expectedChars_fromPath("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            string expected = Helpers.expectedChars_fromPath(@"..\..\..\Testing\New Text Document.txt", count);
             Assert.Equal(expected, actual);
         }
         [Theory]
@@ -79,15 +39,15 @@ namespace PartialFileReaderTest
         public async Task ReadCharsAsync_FileName_Working_NewstartIndex(int count)
         {
 
-            byte[] bytes = File.ReadAllBytes("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt");
+            byte[] bytes = File.ReadAllBytes(@"..\..\..\Testing\New Text Document.txt");
 
             Stream stream = new MemoryStream(bytes);
             int startIndex = 500;
             SeekOrigin startIndexPosition = SeekOrigin.Begin;
-            string actual = await Reader.ReadCharsAsync("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count, startIndex, startIndexPosition);
+            string actual = await Reader.ReadCharsAsync(@"..\..\..\Testing\New Text Document.txt", count, startIndex, startIndexPosition);
 
 
-            string expected = expectedChars_fromPath("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count, startIndex);
+            string expected = Helpers.expectedChars_fromPath(@"..\..\..\Testing\New Text Document.txt", count, startIndex);
             Assert.Equal(expected, actual);
 
         }
@@ -105,7 +65,7 @@ namespace PartialFileReaderTest
         [InlineData(5000)]
         public async Task ReadCharsAsync_FileName_NotWorking_exceed_count(int count)
         {
-            await Assert.ThrowsAsync<ArgumentException>(async () => await Reader.ReadCharsAsync("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await Reader.ReadCharsAsync(@"..\..\..\Testing\New Text Document.txt", count));
         }
         [Theory]
         [InlineData(-36)]
@@ -115,7 +75,7 @@ namespace PartialFileReaderTest
         public async Task ReadCharsAsync_FileName_NotWorking_negative_count(int count)
         {
 
-            await Assert.ThrowsAsync<OverflowException>(async () => await Reader.ReadCharsAsync("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count));
+            await Assert.ThrowsAsync<OverflowException>(async () => await Reader.ReadCharsAsync(@"..\..\..\Testing\New Text Document.txt", count));
 
         }
         [Theory]
@@ -126,7 +86,7 @@ namespace PartialFileReaderTest
         [InlineData(395)]
         public async Task ReadCharsAsync_FileName_NotWorking_exceed_start_index(int count)
         {
-            await Assert.ThrowsAsync<OverflowException>(async () => await Reader.ReadCharsAsync("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count, 1000));
+            await Assert.ThrowsAsync<OverflowException>(async () => await Reader.ReadCharsAsync(@"..\..\..\Testing\New Text Document.txt", count, 1000));
         }
 
         [Theory]
@@ -138,10 +98,10 @@ namespace PartialFileReaderTest
         public async Task ReadCharsAsync_stream_Working_count(int count)
         {
 
-            var expectedStream = GetFileStream("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            var expectedStream = Helpers.GetFileStream(@"..\..\..\Testing\New Text Document.txt", count);
 
             string actual = await Reader.ReadCharsAsync(expectedStream, count);
-            string expected = expectedChars_fromPath("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            string expected = Helpers.expectedChars_fromPath(@"..\..\..\Testing\New Text Document.txt", count);
             Assert.Equal(expected, actual);
         }
         [Theory]
@@ -150,7 +110,7 @@ namespace PartialFileReaderTest
         [InlineData(5000)]
         public async Task ReadCharsAsync_stream_NotWorking_exceed_count(int count)
         {
-            var expectedStream = GetFileStream("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            var expectedStream = Helpers.GetFileStream(@"..\..\..\Testing\New Text Document.txt", count);
 
             await Assert.ThrowsAsync<ArgumentException>(async () => await Reader.ReadCharsAsync(expectedStream, count));
         }
@@ -161,7 +121,7 @@ namespace PartialFileReaderTest
         [InlineData(-395)]
         public async Task ReadCharsAsync_stream_NotWorking_negative_count(int count)
         {
-            var expectedStream = GetFileStream("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            var expectedStream = Helpers.GetFileStream(@"..\..\..\Testing\New Text Document.txt", count);
 
             await Assert.ThrowsAsync<OverflowException>(async () => await Reader.ReadCharsAsync(expectedStream, count));
         }
@@ -173,7 +133,7 @@ namespace PartialFileReaderTest
         [InlineData(395)]
         public async Task ReadCharsAsync_stream_NotWorking_exceed_start_index(int count)
         {
-            var expectedStream = GetFileStream("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            var expectedStream = Helpers.GetFileStream(@"..\..\..\Testing\New Text Document.txt", count);
 
             await Assert.ThrowsAsync<OverflowException>(async () => await Reader.ReadCharsAsync(expectedStream, count, 1000));
         }
@@ -190,9 +150,9 @@ namespace PartialFileReaderTest
         [InlineData(395)]
         public void ReadChars_FileName_Working_count(int count)
         {
-            string actual = Reader.ReadChars("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            string actual = Reader.ReadChars(@"..\..\..\Testing\New Text Document.txt", count);
 
-            string expected = expectedChars_fromPath("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            string expected = Helpers.expectedChars_fromPath(@"..\..\..\Testing\New Text Document.txt", count);
 
 
             Assert.Equal(expected, actual);
@@ -211,7 +171,7 @@ namespace PartialFileReaderTest
         [InlineData(5000)]
         public void ReadChars_FileName_NotWorking_exceed_count(int count)
         {
-            Assert.Throws<ArgumentException>(() => Reader.ReadChars("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count));
+            Assert.Throws<ArgumentException>(() => Reader.ReadChars(@"..\..\..\Testing\New Text Document.txt", count));
         }
         [Theory]
         [InlineData(-36)]
@@ -221,7 +181,7 @@ namespace PartialFileReaderTest
         public void ReadChars_FileName_NotWorking_negative_count(int count)
         {
 
-            Assert.Throws<OverflowException>(() => Reader.ReadChars("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count));
+            Assert.Throws<OverflowException>(() => Reader.ReadChars(@"..\..\..\Testing\New Text Document.txt", count));
 
         }
         [Theory]
@@ -232,7 +192,7 @@ namespace PartialFileReaderTest
         [InlineData(395)]
         public void ReadChars_FileName_NotWorking_exceed_start_index(int count)
         {
-            Assert.Throws<OverflowException>(() => Reader.ReadChars("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count, 1000));
+            Assert.Throws<OverflowException>(() => Reader.ReadChars(@"..\..\..\Testing\New Text Document.txt", count, 1000));
         }
 
         [Theory]
@@ -243,10 +203,10 @@ namespace PartialFileReaderTest
         [InlineData(395)]
         public async Task ReadChars_stream_Working_count(int count)
         {
-            var expectedStream = GetFileStream("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            var expectedStream = Helpers.GetFileStream(@"..\..\..\Testing\New Text Document.txt", count);
 
             string actual = await Reader.ReadCharsAsync(expectedStream, count);
-            string expected = expectedChars_fromPath("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            string expected = Helpers.expectedChars_fromPath(@"..\..\..\Testing\New Text Document.txt", count);
             Assert.Equal(expected, actual);
         }
         [Theory]
@@ -255,7 +215,7 @@ namespace PartialFileReaderTest
         [InlineData(5000)]
         public void ReadChars_stream_NotWorking_exceed_count(int count) // should fire ArgumentException
         {
-            var expectedStream = GetFileStream("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            var expectedStream = Helpers.GetFileStream(@"..\..\..\Testing\New Text Document.txt", count);
 
             Assert.Throws<ArgumentException>(() => Reader.ReadChars(expectedStream, count));
         }
@@ -269,7 +229,7 @@ namespace PartialFileReaderTest
         public void ReadChars_stream_NotWorking_negative_count(int count)
         {
 
-            Assert.Throws<OverflowException>(() => Reader.ReadChars("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count));
+            Assert.Throws<OverflowException>(() => Reader.ReadChars(@"..\..\..\Testing\New Text Document.txt", count));
 
         }
         [Theory]
@@ -280,7 +240,7 @@ namespace PartialFileReaderTest
         [InlineData(395)]
         public void ReadChars_stream_NotWorking_exceed_start_index(int count)
         {
-            Assert.Throws<OverflowException>(() => Reader.ReadChars("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count, 1000));
+            Assert.Throws<OverflowException>(() => Reader.ReadChars(@"..\..\..\Testing\New Text Document.txt", count, 1000));
         }
         #endregion
         #endregion
@@ -299,9 +259,9 @@ namespace PartialFileReaderTest
         public async Task ReadBytesAsync_FileName_Working_count(int count)
         {
 
-            var actual = await Reader.ReadBytesAsync("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            var actual = await Reader.ReadBytesAsync(@"..\..\..\Testing\New Text Document.txt", count);
 
-            var expected = await expectedBytes("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            var expected = await Helpers.expectedBytes(@"..\..\..\Testing\New Text Document.txt", count);
 
             Assert.Equal(expected, actual);
 
@@ -315,15 +275,15 @@ namespace PartialFileReaderTest
         public async Task ReadBytesAsync_FileName_Working_NewstartIndex(int count)
         {
 
-            byte[] bytes = File.ReadAllBytes("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt");
+            byte[] bytes = File.ReadAllBytes(@"..\..\..\Testing\New Text Document.txt");
 
             Stream stream = new MemoryStream(bytes);
             int startIndex = 500;
             SeekOrigin startIndexPosition = SeekOrigin.Begin;
-            var actual = await Reader.ReadBytesAsync("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count, startIndex, startIndexPosition);
+            var actual = await Reader.ReadBytesAsync(@"..\..\..\Testing\New Text Document.txt", count, startIndex, startIndexPosition);
 
 
-            var expected =await expectedBytes("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count, startIndex);
+            var expected =await Helpers.expectedBytes(@"..\..\..\Testing\New Text Document.txt", count, startIndex);
             Assert.Equal(expected, actual);
 
         }
@@ -341,7 +301,7 @@ namespace PartialFileReaderTest
         [InlineData(5000)]
         public async Task ReadBytesAsync_FileName_NotWorking_exceed_count(int count)
         {
-            await Assert.ThrowsAsync<ArgumentException>(async () => await Reader.ReadBytesAsync("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await Reader.ReadBytesAsync(@"..\..\..\Testing\New Text Document.txt", count));
         }
         [Theory]
         [InlineData(-36)]
@@ -351,7 +311,7 @@ namespace PartialFileReaderTest
         public async Task ReadBytesAsync_FileName_NotWorking_negative_count(int count)
         {
 
-            await Assert.ThrowsAsync<OverflowException>(async () => await Reader.ReadBytesAsync("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count));
+            await Assert.ThrowsAsync<OverflowException>(async () => await Reader.ReadBytesAsync(@"..\..\..\Testing\New Text Document.txt", count));
 
         }
         [Theory]
@@ -362,7 +322,7 @@ namespace PartialFileReaderTest
         [InlineData(395)]
         public async Task ReadBytesAsync_FileName_NotWorking_exceed_start_index(int count)
         {
-            await Assert.ThrowsAsync<OverflowException>(async () => await Reader.ReadBytesAsync("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count, 1000));
+            await Assert.ThrowsAsync<OverflowException>(async () => await Reader.ReadBytesAsync(@"..\..\..\Testing\New Text Document.txt", count, 1000));
         }
 
         [Theory]
@@ -374,10 +334,10 @@ namespace PartialFileReaderTest
         public async Task ReadBytesAsync_stream_Working_count(int count)
         {
 
-            var expectedStream = GetFileStream("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            var expectedStream = Helpers.GetFileStream(@"..\..\..\Testing\New Text Document.txt", count);
 
             var actual = await Reader.ReadBytesAsync(expectedStream, count);
-            var expected =await expectedBytes("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            var expected =await Helpers.expectedBytes(@"..\..\..\Testing\New Text Document.txt", count);
             Assert.Equal(expected, actual);
         }
         [Theory]
@@ -386,7 +346,7 @@ namespace PartialFileReaderTest
         [InlineData(5000)]
         public async Task ReadBytesAsync_stream_NotWorking_exceed_count(int count)
         {
-            var expectedStream = GetFileStream("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            var expectedStream = Helpers.GetFileStream(@"..\..\..\Testing\New Text Document.txt", count);
 
             await Assert.ThrowsAsync<ArgumentException>(async () => await Reader.ReadBytesAsync(expectedStream, count));
         }
@@ -397,7 +357,7 @@ namespace PartialFileReaderTest
         [InlineData(-395)]
         public async Task ReadBytesAsync_stream_NotWorking_negative_count(int count)
         {
-            var expectedStream = GetFileStream("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            var expectedStream = Helpers.GetFileStream(@"..\..\..\Testing\New Text Document.txt", count);
 
             await Assert.ThrowsAsync<OverflowException>(async () => await Reader.ReadBytesAsync(expectedStream, count));
         }
@@ -409,7 +369,7 @@ namespace PartialFileReaderTest
         [InlineData(395)]
         public async Task ReadBytesAsync_stream_NotWorking_exceed_start_index(int count)
         {
-            var expectedStream = GetFileStream("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            var expectedStream = Helpers.GetFileStream(@"..\..\..\Testing\New Text Document.txt", count);
 
             await Assert.ThrowsAsync<OverflowException>(async () => await Reader.ReadBytesAsync(expectedStream, count, 1000));
         }
@@ -426,9 +386,9 @@ namespace PartialFileReaderTest
         [InlineData(395)]
         public void ReadBytes_FileName_Working_count(int count)
         {
-            string actual = Reader.ReadChars("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            string actual = Reader.ReadChars(@"..\..\..\Testing\New Text Document.txt", count);
 
-            string expected = expectedChars_fromPath("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            string expected = Helpers.expectedChars_fromPath(@"..\..\..\Testing\New Text Document.txt", count);
 
 
             Assert.Equal(expected, actual);
@@ -447,7 +407,7 @@ namespace PartialFileReaderTest
         [InlineData(5000)]
         public void ReadBytes_FileName_NotWorking_exceed_count(int count)
         {
-            Assert.Throws<ArgumentException>(() => Reader.ReadChars("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count));
+            Assert.Throws<ArgumentException>(() => Reader.ReadChars(@"..\..\..\Testing\New Text Document.txt", count));
         }
         [Theory]
         [InlineData(-36)]
@@ -457,7 +417,7 @@ namespace PartialFileReaderTest
         public void ReadBytes_FileName_NotWorking_negative_count(int count)
         {
 
-            Assert.Throws<OverflowException>(() => Reader.ReadChars("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count));
+            Assert.Throws<OverflowException>(() => Reader.ReadChars(@"..\..\..\Testing\New Text Document.txt", count));
 
         }
         [Theory]
@@ -468,7 +428,7 @@ namespace PartialFileReaderTest
         [InlineData(395)]
         public void ReadBytes_FileName_NotWorking_exceed_start_index(int count)
         {
-            Assert.Throws<OverflowException>(() => Reader.ReadChars("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count, 1000));
+            Assert.Throws<OverflowException>(() => Reader.ReadChars(@"..\..\..\Testing\New Text Document.txt", count, 1000));
         }
 
         [Theory]
@@ -479,10 +439,10 @@ namespace PartialFileReaderTest
         [InlineData(395)]
         public async Task ReadBytes_stream_Working_count(int count)
         {
-            var expectedStream = GetFileStream("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            var expectedStream = Helpers.GetFileStream(@"..\..\..\Testing\New Text Document.txt", count);
 
             string actual = await Reader.ReadCharsAsync(expectedStream, count);
-            string expected = expectedChars_fromPath("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            string expected = Helpers.expectedChars_fromPath(@"..\..\..\Testing\New Text Document.txt", count);
             Assert.Equal(expected, actual);
         }
         [Theory]
@@ -491,7 +451,7 @@ namespace PartialFileReaderTest
         [InlineData(5000)]
         public void ReadBytes_stream_NotWorking_exceed_count(int count) // should fire ArgumentException
         {
-            var expectedStream = GetFileStream("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count);
+            var expectedStream = Helpers.GetFileStream(@"..\..\..\Testing\New Text Document.txt", count);
 
             Assert.Throws<ArgumentException>(() => Reader.ReadChars(expectedStream, count));
         }
@@ -505,7 +465,7 @@ namespace PartialFileReaderTest
         public void ReadBytes_stream_NotWorking_negative_count(int count)
         {
 
-            Assert.Throws<OverflowException>(() => Reader.ReadChars("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count));
+            Assert.Throws<OverflowException>(() => Reader.ReadChars(@"..\..\..\Testing\New Text Document.txt", count));
 
         }
         [Theory]
@@ -516,7 +476,7 @@ namespace PartialFileReaderTest
         [InlineData(395)]
         public void ReadBytes_stream_NotWorking_exceed_start_index(int count)
         {
-            Assert.Throws<OverflowException>(() => Reader.ReadChars("D:\\Temp\\PartialFileReader\\bin\\Debug\\netstandard2.1\\New Text Document.txt", count, 1000));
+            Assert.Throws<OverflowException>(() => Reader.ReadChars(@"..\..\..\Testing\New Text Document.txt", count, 1000));
         }
         #endregion
         #endregion
